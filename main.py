@@ -23,7 +23,7 @@ class QtLauncher(QMainWindow, Ui_MainWindow):
 
         create_json()
 
-        with open(f'{get_theme()}.qss') as qss:
+        with open(f'style/{get_theme()}.qss') as qss:
             self.setStyleSheet(qss.read())
 
         self.add_game.clicked.connect(self.open_dialog)
@@ -37,7 +37,7 @@ class QtLauncher(QMainWindow, Ui_MainWindow):
         self.action_3.triggered.connect(lambda: self.set_theme("dark"))
 
     def set_theme(self, theme):
-        with open(f'{theme}.qss') as qss:
+        with open(f'style/{theme}.qss') as qss:
             self.setStyleSheet(qss.read())
         update_setting("theme", theme)
 
