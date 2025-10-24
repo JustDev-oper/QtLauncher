@@ -1,0 +1,44 @@
+QMainWindow {
+    background-color: #2b2b2b; /* Тёмно-серый фон */
+}
+/* Стиль для всего меню-бара */
+QMenuBar {
+    background-color: #3c3f41;
+    color: #a9b7c6;
+}
+/* Стиль для отдельного пункта меню (Файл, Правка...) */
+QMenuBar::item {
+    background-color: transparent; /* Прозрачный фон */
+}
+/* Стиль для пункта меню при его выборе */
+QMenuBar::item:selected {
+    background-color: #555;
+}
+/* Стиль для выпадающего меню */
+QMenu {
+    background-color: #3c3f41;
+    color: #a9b7c6;
+    border: 1px solid #555;
+}
+/* Стиль для пунктов в выпадающем меню при наведении */
+QMenu::item:selected {
+    background-color: #555;
+}
+/* Стиль для кнопок */
+QPushButton {
+    background-color: #3c3f41;
+    color: #a9b7c6;
+    border: 1px solid #555;
+    border-radius: 5px;
+    padding: 5px 10px;
+}
+/* Стиль для кнопок при наведении мышки */
+QPushButton:hover {
+    border: 2px solid #3498db; /* Синяя рамка */
+    border-radius: 10px;
+}
+/* Стиль для кнопок при клике мышки */
+QPushButton:pressed {
+    border: 2px solid #2980b9; /* Тёмно-синяя рамка */
+    border-radius: 10px;
+}

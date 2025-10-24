@@ -1,0 +1,77 @@
+QMainWindow {
+    background-color: #f4f4f4; /* Светло-серый фон */
+}
+
+/* Меню-бар */
+QMenuBar {
+    background-color: #e6e6e6;
+    color: #2b2b2b;
+}
+
+/* Пункты меню */
+QMenuBar::item {
+    background-color: transparent;
+}
+
+/* Пункт меню при наведении */
+QMenuBar::item:selected {
+    background-color: #d0d0d0;
+}
+
+/* Выпадающее меню */
+QMenu {
+    background-color: #ffffff;
+    color: #2b2b2b;
+    border: 1px solid #cccccc;
+}
+
+/* Пункты в выпадающем меню при наведении */
+QMenu::item:selected {
+    background-color: #dceeff; /* Нежно-голубой фон при наведении */
+}
+
+/* Кнопки */
+QPushButton {
+    background-color: #e6e6e6;
+    color: #2b2b2b;
+    border: 1px solid #bbbbbb;
+    border-radius: 5px;
+    padding: 5px 10px;
+}
+
+/* Кнопки при наведении */
+QPushButton:hover {
+    border: 2px solid #3498db; /* Синяя рамка */
+    border-radius: 10px;
+}
+
+/* Кнопки при нажатии */
+QPushButton:pressed {
+    border: 2px solid #2980b9; /* Тёмно-синяя рамка */
+    border-radius: 10px;
+    background-color: #d9eaff;
+}
+
+/* Метки (Label) */
+QLabel {
+    color: #000000; /* Чёрный текст */
+}
+
+/* Список (ListWidget) */
+QListWidget {
+    background-color: #eeeeee; /* Светло-серый фон */
+    color: #2b2b2b;            /* Тёмно-серый текст */
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+}
+
+/* Элементы списка при наведении */
+QListWidget::item:hover {
+    background-color: #dceeff; /* Голубой оттенок при наведении */
+}
+
+/* Выбранный элемент */
+QListWidget::item:selected {
+    background-color: #cce4ff; /* Чуть ярче при выборе */
+    color: #000000;
+}
