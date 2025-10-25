@@ -9,34 +9,40 @@ from ui.mainWindow_ui import Ui_MainWindow
 from utils import txt_editor, json_editor
 
 
+def resource_path(relative_path: str) -> str:
+    """Корректный путь к файлу для работы из .py и из .exe"""
+    if hasattr(sys, "_MEIPASS"):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
+
+
 class QtLauncher(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setFixedSize(750, 420)
-
         self.setupUi(self)
-        self.update_game_list()
 
+        self.update_game_list()
         txt_editor.create_txt()
         self.update_last_game_list()
-
         json_editor.create_json()
 
-        with open(f'style/{json_editor.get_theme()}.qss') as qss:
+        theme_file = resource_path(f"style/{json_editor.get_theme()}.qss")
+        with open(theme_file, "r", encoding="utf-8") as qss:
             self.setStyleSheet(qss.read())
 
+        # Сигналы
         self.add_game.clicked.connect(self.open_dialog)
         self.list_games.itemDoubleClicked.connect(self.open_game)
         self.delete_game.clicked.connect(self.delete_game_from_list)
-
         self.sort_name_a_z.clicked.connect(lambda: self.sort_games(""))
         self.sort_name_z_a.clicked.connect(lambda: self.sort_games("r"))
-
         self.action_2.triggered.connect(lambda: self.set_theme("light"))
         self.action_3.triggered.connect(lambda: self.set_theme("dark"))
 
     def set_theme(self, theme):
-        with open(f'style/{theme}.qss') as qss:
+        theme_file = resource_path(f"style/{theme}.qss")
+        with open(theme_file, "r", encoding="utf-8") as qss:
             self.setStyleSheet(qss.read())
         json_editor.update_setting("theme", theme)
 
