@@ -2,3 +2,6 @@
 ui/add_game_dialog.ui
 ui/mainWindow.ui
 venv
+main.spec
+build
+dist

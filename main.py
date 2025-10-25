@@ -6,8 +6,7 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox
 import dialogs
 from db import database
 from ui.mainWindow_ui import Ui_MainWindow
-from utils import create_json, get_theme, update_setting, add_game_to_history, \
-    get_last_games, create_txt
+from utils import txt_editor, json_editor
 
 
 class QtLauncher(QMainWindow, Ui_MainWindow):
@@ -18,12 +17,12 @@ class QtLauncher(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.update_game_list()
 
-        create_txt()
+        txt_editor.create_txt()
         self.update_last_game_list()
 
-        create_json()
+        json_editor.create_json()
 
-        with open(f'style/{get_theme()}.qss') as qss:
+        with open(f'style/{json_editor.get_theme()}.qss') as qss:
             self.setStyleSheet(qss.read())
 
         self.add_game.clicked.connect(self.open_dialog)
@@ -39,7 +38,7 @@ class QtLauncher(QMainWindow, Ui_MainWindow):
     def set_theme(self, theme):
         with open(f'style/{theme}.qss') as qss:
             self.setStyleSheet(qss.read())
-        update_setting("theme", theme)
+        json_editor.update_setting("theme", theme)
 
     def update_game_list(self):
         games = database.get_games()
@@ -48,7 +47,7 @@ class QtLauncher(QMainWindow, Ui_MainWindow):
             self.list_games.addItem(game)
 
     def update_last_game_list(self):
-        games = get_last_games()
+        games = txt_editor.get_last_games()
         self.last_games.clear()
         for game in games:
             self.last_games.addItem(game)
@@ -72,7 +71,7 @@ class QtLauncher(QMainWindow, Ui_MainWindow):
     def open_game(self, item):
         game = database.get_game(item.text())
         try:
-            add_game_to_history(game[1])
+            txt_editor.add_game_to_history(game[1])
             os.startfile(game[2])
         except Exception as e:
             QMessageBox.warning(self, "Ошибка!", str(e))
