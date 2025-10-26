@@ -14,7 +14,8 @@ exclude =
     ENV,
     .env,
     .gitignore,
-    requirements*.txt
+    requirements*.txt,
+    ui
 max-line-length = 79
 extend-ignore = E203, W503
 per-file-ignores =
