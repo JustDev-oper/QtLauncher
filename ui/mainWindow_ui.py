@@ -14,10 +14,15 @@ class Ui_MainWindow(object):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setEnabled(True)
         MainWindow.resize(750, 380)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Preferred,
+            QtWidgets.QSizePolicy.Policy.Preferred,
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            MainWindow.sizePolicy().hasHeightForWidth()
+        )
         MainWindow.setSizePolicy(sizePolicy)
         MainWindow.setAutoFillBackground(False)
         self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
@@ -30,7 +35,9 @@ class Ui_MainWindow(object):
         font.setBold(False)
         font.setWeight(50)
         self.list_games.setFont(font)
-        self.list_games.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.DoubleClicked)
+        self.list_games.setEditTriggers(
+            QtWidgets.QAbstractItemView.EditTrigger.DoubleClicked
+        )
         self.list_games.setMovement(QtWidgets.QListView.Movement.Static)
         self.list_games.setFlow(QtWidgets.QListView.Flow.TopToBottom)
         self.list_games.setProperty("isWrapping", False)
@@ -130,9 +137,18 @@ class Ui_MainWindow(object):
         self.list_games.setSortingEnabled(False)
         self.add_game.setText(_translate("MainWindow", "Добавить игру"))
         self.delete_game.setText(_translate("MainWindow", "Удалить игру"))
-        self.sort_name_a_z.setText(_translate("MainWindow", "Сортировать по имени А - Я"))
-        self.sort_name_z_a.setText(_translate("MainWindow", "Сортировать по имени Я - А"))
-        self.label.setText(_translate("MainWindow", "Для запуска просто нажмите ДВА раза на название игры"))
+        self.sort_name_a_z.setText(
+            _translate("MainWindow", "Сортировать по имени А - Я")
+        )
+        self.sort_name_z_a.setText(
+            _translate("MainWindow", "Сортировать по имени Я - А")
+        )
+        self.label.setText(
+            _translate(
+                "MainWindow",
+                "Для запуска просто нажмите ДВА раза на название игры",
+            )
+        )
         self.menu.setTitle(_translate("MainWindow", "Настройки"))
         self.menu_2.setTitle(_translate("MainWindow", "Сменить тему"))
         self.action_2.setText(_translate("MainWindow", "Светлая"))

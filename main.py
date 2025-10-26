@@ -89,7 +89,7 @@ class QtLauncher(QMainWindow, Ui_MainWindow):
         self.update_game_list()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     wind = QtLauncher()
     wind.show()

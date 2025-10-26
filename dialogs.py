@@ -20,8 +20,8 @@ class AddGameDialog(QDialog, Ui_Dialog):
 
     def choose_file(self):
         file_path = QFileDialog.getOpenFileName(
-            self, 'Выбрать файл', '',
-            'EXE - Файл (*.exe)')[0]
+            self, "Выбрать файл", "", "EXE - Файл (*.exe)"
+        )[0]
         if file_path:
             self.file_path.setText(file_path)
 
@@ -38,13 +38,15 @@ class AddGameDialog(QDialog, Ui_Dialog):
             return
 
         if not database.check_name_is_unique(game_name):
-            QMessageBox.warning(self, "Ошибка",
-                                "Игра с таким именем уже существует")
+            QMessageBox.warning(
+                self, "Ошибка", "Игра с таким именем уже существует"
+            )
             return
 
         if not database.check_path_is_unique(game_path):
-            QMessageBox.warning(self, "Ошибка",
-                                "Игра с таким путём уке существует")
+            QMessageBox.warning(
+                self, "Ошибка", "Игра с таким путём уке существует"
+            )
             return
 
         try:
@@ -53,5 +55,6 @@ class AddGameDialog(QDialog, Ui_Dialog):
             QMessageBox.information(self, "Успех", "Игра добавлена!")
 
         except Exception as e:
-            QMessageBox.critical(self, "Ошибка",
-                                 f"Не удалось добавить игру: {str(e)}")
+            QMessageBox.critical(
+                self, "Ошибка", f"Не удалось добавить игру: {str(e)}"
+            )

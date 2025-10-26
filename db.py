@@ -4,8 +4,8 @@ from pathlib import Path
 
 
 def get_data_path():
-    documents_path = Path.home() / 'Documents'
-    data_path = documents_path / 'QtLauncher_Data'
+    documents_path = Path.home() / "Documents"
+    data_path = documents_path / "QtLauncher_Data"
     data_path.mkdir(exist_ok=True)
     return data_path
 
@@ -13,7 +13,7 @@ def get_data_path():
 class Database:
     def __init__(self):
         self.data_path = get_data_path()
-        self.db_path = self.data_path / 'games.db'
+        self.db_path = self.data_path / "games.db"
         self.create_tables()
 
     def get_connection(self):
@@ -23,11 +23,11 @@ class Database:
         conn = self.get_connection()
         cursor = conn.cursor()
         cursor.execute(
-            '''CREATE TABLE IF NOT EXISTS Games (
+            """CREATE TABLE IF NOT EXISTS Games (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE,
             path TEXT NOT NULL UNIQUE
-            )'''
+            )"""
         )
         conn.commit()
         conn.close()
@@ -35,9 +35,7 @@ class Database:
     def check_name_is_unique(self, name):
         conn = self.get_connection()
         cursor = conn.cursor()
-        cursor.execute(
-            "SELECT COUNT(*) FROM Games WHERE name = ?", (name,)
-        )
+        cursor.execute("SELECT COUNT(*) FROM Games WHERE name = ?", (name,))
         count = cursor.fetchone()[0]
         return count == 0
 
@@ -56,7 +54,7 @@ class Database:
         try:
             cursor.execute(
                 "INSERT INTO Games (name, path) VALUES (?, ?)",
-                (name, game_path)
+                (name, game_path),
             )
             conn.commit()
             print(f"Игра '{name}' добавлена в базу данных")
@@ -70,10 +68,7 @@ class Database:
     def delete_game(self, name):
         conn = self.get_connection()
         cursor = conn.cursor()
-        cursor.execute(
-            "DELETE FROM Games WHERE name = ?",
-            (name,)
-        )
+        cursor.execute("DELETE FROM Games WHERE name = ?", (name,))
         conn.commit()
         conn.close()
 
@@ -90,10 +85,7 @@ class Database:
     def get_game(self, name):
         conn = self.get_connection()
         cursor = conn.cursor()
-        cursor.execute(
-            "SELECT * FROM Games WHERE name = ?",
-            (name,)
-        )
+        cursor.execute("SELECT * FROM Games WHERE name = ?", (name,))
         row = cursor.fetchone()
         conn.close()
         return row
