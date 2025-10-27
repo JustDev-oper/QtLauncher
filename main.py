@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox
 
 import dialogs
 from db import database
-from ui.mainWindow_ui import Ui_MainWindow
+from ui.mainWindow import Ui_MainWindow
 from utils import txt_editor, json_editor
 
 
@@ -43,7 +43,9 @@ class QtLauncher(QMainWindow, Ui_MainWindow):
         self.action_2.triggered.connect(lambda: self.set_theme("light"))
         self.action_3.triggered.connect(lambda: self.set_theme("dark"))
         self.create_category.triggered.connect(
-            lambda: self.open_dialog("add_category")
+            lambda: self.open_dialog("add_category"))
+        self.delete_category.triggered.connect(
+            lambda: self.open_dialog("delete_category")
         )
 
     def set_theme(self, theme):
@@ -98,6 +100,10 @@ class QtLauncher(QMainWindow, Ui_MainWindow):
             _dialog = dialogs.AddCategoryDialog()
             _dialog.exec()
             self.update_menu_bar()
+        if dialog == "delete_category":
+            _dialog = dialogs.DeleteCategoryDialog()
+            _dialog.exec()
+            self.update_menu_bar()
 
     def update_menu_bar(self):
         menu = self.menu_3
@@ -110,7 +116,7 @@ class QtLauncher(QMainWindow, Ui_MainWindow):
                 break
 
         if separator_index != -1:
-            for action in actions[separator_index + 1 :]:
+            for action in actions[separator_index + 1:]:
                 menu.removeAction(action)
 
         categories = database.get_categories()
@@ -118,7 +124,8 @@ class QtLauncher(QMainWindow, Ui_MainWindow):
             category_name = category[0]
             action = QAction(category_name, self)
             action.triggered.connect(
-                lambda checked, cat_name=category_name: self.on_category_selected(
+                lambda checked,
+                       cat_name=category_name: self.on_category_selected(
                     cat_name
                 )
             )

@@ -39,9 +39,8 @@ class Database:
             )"""
         )
 
-        cursor.execute(
-            "INSERT OR IGNORE INTO Categories (name) VALUES (?)", ("Все",)
-        )
+        cursor.execute("INSERT OR IGNORE INTO Categories (name) VALUES (?)",
+                       ("Все",))
 
         conn.commit()
         conn.close()
@@ -56,9 +55,8 @@ class Database:
     def check_path_is_unique(self, game_path):
         conn = self.get_connection()
         cursor = conn.cursor()
-        cursor.execute(
-            "SELECT COUNT(*) FROM Games WHERE path = ?", (game_path,)
-        )
+        cursor.execute("SELECT COUNT(*) FROM Games WHERE path = ?",
+                       (game_path,))
         count = cursor.fetchone()[0]
         return count == 0
 
@@ -95,6 +93,42 @@ class Database:
         finally:
             conn.close()
 
+    def delete_category(self, category_id):
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute(
+                "DELETE FROM Categories WHERE id = ?", (category_id,)
+            )
+            conn.commit()
+        except Exception as e:
+            print(f"Ошибка при удалении категории: {e}")
+        finally:
+            conn.close()
+
+    def get_games_by_category(self, category_id):
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM Games WHERE category_id = ?",
+                       (category_id,))
+        games = cursor.fetchall()
+        conn.close()
+        return games
+
+    def edit_games_category(self, category_id_old, category_id_new):
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute(
+                "UPDATE Games SET category_id = ? WHERE category_id = ?",
+                (category_id_new, category_id_old),
+            )
+            conn.commit()
+        except Exception as e:
+            print(f"Ошибка при изменении категории для игры: {str(e)}")
+        finally:
+            conn.close()
+
     def get_categories(self):
         conn = self.get_connection()
         cursor = conn.cursor()
@@ -122,9 +156,8 @@ class Database:
     def category_name_check_unique(self, name):
         conn = self.get_connection()
         cursor = conn.cursor()
-        cursor.execute(
-            "SELECT COUNT(*) FROM Categories WHERE name = ?", (name,)
-        )
+        cursor.execute("SELECT COUNT(*) FROM Categories WHERE name = ?",
+                       (name,))
         count = cursor.fetchone()[0]
         return count == 0
 

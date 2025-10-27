@@ -23,9 +23,7 @@ class TXTEditor:
     def add_game_to_history(self, game_name):
         current_games = self.get_last_games()
         current_games = [
-            game
-            for game in current_games
-            if game != game_name and game.strip()
+            game for game in current_games if game != game_name and game.strip()
         ]
         current_games.insert(0, game_name)
         current_games = current_games[:5]

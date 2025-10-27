@@ -1,8 +1,9 @@
 from PyQt6.QtWidgets import QDialog, QFileDialog, QMessageBox
 
 from db import database
-from ui.add_game_dialog_ui import Ui_Dialog as AddGameUI
-from ui.createCategory_ui import Ui_Dialog as AddCategoryUI
+from ui.add_game_dialog import Ui_Dialog as AddGameUI
+from ui.createCategory import Ui_Dialog as AddCategoryUI
+from ui.deleteCategory import Ui_Dialog as DeleteCategoryUI
 
 
 class AddGameDialog(QDialog, AddGameUI):
@@ -38,8 +39,7 @@ class AddGameDialog(QDialog, AddGameUI):
         game_name = self.game_name.text().strip()
         game_path = self.file_path.text().strip()
         category_id = database.get_category_id_by_name(
-            self.comboBox.currentText()
-        )
+            self.comboBox.currentText())
 
         if not game_name:
             QMessageBox.warning(self, "Ошибка", "Введите название игры")
@@ -53,15 +53,13 @@ class AddGameDialog(QDialog, AddGameUI):
             category_id = 1
 
         if not database.check_name_is_unique(game_name):
-            QMessageBox.warning(
-                self, "Ошибка", "Игра с таким именем уже существует"
-            )
+            QMessageBox.warning(self, "Ошибка",
+                                "Игра с таким именем уже существует")
             return
 
         if not database.check_path_is_unique(game_path):
-            QMessageBox.warning(
-                self, "Ошибка", "Игра с таким путём уке существует"
-            )
+            QMessageBox.warning(self, "Ошибка",
+                                "Игра с таким путём уке существует")
             return
 
         try:
@@ -70,9 +68,8 @@ class AddGameDialog(QDialog, AddGameUI):
             QMessageBox.information(self, "Успех", "Игра добавлена!")
 
         except Exception as e:
-            QMessageBox.critical(
-                self, "Ошибка", f"Не удалось добавить игру: {str(e)}"
-            )
+            QMessageBox.critical(self, "Ошибка",
+                                 f"Не удалось добавить игру: {str(e)}")
 
 
 class AddCategoryDialog(QDialog, AddCategoryUI):
@@ -91,25 +88,70 @@ class AddCategoryDialog(QDialog, AddCategoryUI):
     def accept_dialog(self):
         category_name = self.lineEdit.text().strip()
         if not category_name:
-            QMessageBox.warning(
-                self, "Ошибка", "Категория не может быть пустой"
-            )
+            QMessageBox.warning(self, "Ошибка",
+                                "Категория не может быть пустой")
             return
 
         if not database.category_name_check_unique(category_name):
-            QMessageBox.warning(
-                self, "Ошибка", "Категория с таким именем уже есть"
-            )
+            QMessageBox.warning(self, "Ошибка",
+                                "Категория с таким именем уже есть")
             return
 
         try:
             database.insert_category(category_name)
             self.accept()
-            QMessageBox.information(
-                self, "Успех", "Категория успешно добавлена"
-            )
+            QMessageBox.information(self, "Успех",
+                                    "Категория успешно добавлена")
 
         except Exception as e:
             QMessageBox.critical(
                 self, "Ошибка", f"Не удалось добавить категорию: {str(e)}"
+            )
+
+
+class DeleteCategoryDialog(QDialog, DeleteCategoryUI):
+    def __init__(self):
+        super().__init__()
+        self.setFixedSize(300, 110)
+
+        self.setupUi(self)
+
+        self.get_categories()
+
+        self.buttonBox.accepted.disconnect()
+        self.buttonBox.rejected.disconnect()
+
+        self.buttonBox.accepted.connect(self.accept_dialog)
+        self.buttonBox.rejected.connect(self.reject)
+
+    def get_categories(self):
+        combobox = self.comboBox
+        categories = database.get_categories()
+        for category in categories:
+            combobox.addItem(category[0])
+
+    def accept_dialog(self):
+        category_name = self.comboBox.currentText()
+        if category_name == "Все":
+            QMessageBox.warning(self, "Ошибка",
+                                "Данную категорию удалить нельзя!")
+            return
+        if not category_name:
+            QMessageBox.warning(self, "Ошибка",
+                                "Категория не может быть пустой")
+            return
+
+        try:
+            database.edit_games_category(
+                database.get_category_id_by_name(category_name), 1)
+
+            database.delete_category(
+                database.get_category_id_by_name(category_name))
+            self.accept()
+            QMessageBox.information(self, "Успех",
+                                    "Категория успешно удалена")
+
+        except Exception as e:
+            QMessageBox.critical(
+                self, "Ошибка", f"Не удалось удалить категорию: {str(e)}"
             )
