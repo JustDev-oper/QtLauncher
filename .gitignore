@@ -1,6 +1,7 @@
 .idea
 ui/add_game_dialog.ui
 ui/mainWindow.ui
+ui/createCategory.ui
 venv
 main.spec
 build

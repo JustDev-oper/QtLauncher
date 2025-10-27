@@ -12,11 +12,11 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(450, 120)
+        Dialog.resize(450, 171)
         Dialog.setSizeGripEnabled(False)
         Dialog.setModal(False)
         self.buttonBox = QtWidgets.QDialogButtonBox(parent=Dialog)
-        self.buttonBox.setGeometry(QtCore.QRect(220, 80, 220, 40))
+        self.buttonBox.setGeometry(QtCore.QRect(220, 130, 220, 40))
         self.buttonBox.setOrientation(QtCore.Qt.Orientation.Horizontal)
         self.buttonBox.setStandardButtons(
             QtWidgets.QDialogButtonBox.StandardButton.Cancel
@@ -57,6 +57,26 @@ class Ui_Dialog(object):
         self.file_path.setText("")
         self.file_path.setReadOnly(True)
         self.file_path.setObjectName("file_path")
+        self.label_2 = QtWidgets.QLabel(parent=Dialog)
+        self.label_2.setGeometry(QtCore.QRect(10, 100, 80, 20))
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(10)
+        font.setBold(False)
+        font.setUnderline(False)
+        font.setWeight(50)
+        self.label_2.setFont(font)
+        self.label_2.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.label_2.setObjectName("label_2")
+        self.comboBox = QtWidgets.QComboBox(parent=Dialog)
+        self.comboBox.setGeometry(QtCore.QRect(100, 100, 111, 22))
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(10)
+        self.comboBox.setFont(font)
+        self.comboBox.setEditable(False)
+        self.comboBox.setFrame(True)
+        self.comboBox.setObjectName("comboBox")
 
         self.retranslateUi(Dialog)
         self.buttonBox.accepted.connect(Dialog.accept)  # type: ignore
@@ -68,3 +88,4 @@ class Ui_Dialog(object):
         Dialog.setWindowTitle(_translate("Dialog", "Добавить игру"))
         self.label.setText(_translate("Dialog", "Имя игры"))
         self.path_button.setText(_translate("Dialog", "Путь к файлу"))
+        self.label_2.setText(_translate("Dialog", "Категория"))
