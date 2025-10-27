@@ -1,0 +1,27 @@
+name: Build on Push
+
+on:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install and Build
+      run: |
+        pip install pyinstaller
+        pip install -r requirements.txt
+        pyinstaller --noconsole --onefile --name "QtLauncher" --add-data "style;style" --add-data "ui;ui" main.py
+
+    - name: Upload Build
+      uses: actions/upload-artifact@v4
+      with:
+        name: latest-build
+        path: dist/
