@@ -1,76 +1,112 @@
 import json
+from pathlib import Path
 
-from db import get_data_path
+
+def get_data_path():
+    documents_path = Path.home() / "Documents"
+    data_path = documents_path / "QtLauncher_Data"
+    data_path.mkdir(exist_ok=True)
+    return data_path
 
 
-class TXTEditor:
-    def __init__(self):
-        self.path = get_data_path() / "last_games.txt"
+class FileManager:
+    def __init__(self, filename):
+        self.path = get_data_path() / filename
 
-    def create_txt(self):
+    def ensure_exists(self, default_content=None):
         if not self.path.exists():
-            with open(self.path, "w", encoding="utf-8") as file:
-                pass
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            if default_content is not None:
+                self._write_content(default_content)
+            else:
+                self.path.touch()
+
+    def _read_content(self):
+        with open(self.path, "r", encoding="utf-8") as file:
+            return file.read()
+
+    def _write_content(self, content):
+        with open(self.path, "w", encoding="utf-8") as file:
+            file.write(content)
+
+
+class GameHistoryManager:
+    def __init__(self):
+        self.file_manager = FileManager("last_games.txt")
+        self.file_manager.ensure_exists()
 
     def get_last_games(self):
         try:
-            with open(self.path, "r", encoding="utf-8") as file:
-                file_data = file.read()
-                return file_data.split("\n")
+            content = self.file_manager._read_content()
+            return [game for game in content.split("\n") if game.strip()]
         except FileNotFoundError:
             return []
 
-    def add_game_to_history(self, game_name):
-        current_games = self.get_last_games()
-        current_games = [
-            game for game in current_games if
-            game != game_name and game.strip()
-        ]
-        current_games.insert(0, game_name)
-        current_games = current_games[:5]
-        self.save_last_games(current_games)
+    def add_game(self, game_name):
+        games = self.get_last_games()
+        # Удаляем дубликат и добавляем в начало
+        games = [game for game in games if game != game_name]
+        games.insert(0, game_name)
+        # Ограничиваем историю 5 играми
+        games = games[:5]
+        self._save_games(games)
 
-    def save_last_games(self, games_list):
-        with open(self.path, "w", encoding="utf-8") as file:
-            for game in games_list:
-                if game.strip():
-                    file.write(game + "\n")
+    def _save_games(self, games):
+        content = "\n".join(game for game in games if game.strip())
+        self.file_manager._write_content(content)
 
-    def clear_game_history(self):
-        with open(self.path, "w", encoding="utf-8") as file:
-            file.write("")
+    def clear_history(self):
+        self.file_manager._write_content("")
 
 
-class JSONEditor:
+class SettingsManager:
     def __init__(self):
-        self.path = get_data_path() / "settings.json"
+        self.file_manager = FileManager("settings.json")
+        self.file_manager.ensure_exists('{"theme": "dark"}')
 
-    def create_json(self):
-        if not self.path.exists():
-            default_settings = {"theme": "dark"}
-            with open(self.path, "w", encoding="utf-8") as file:
-                json.dump(default_settings, file, indent=4, ensure_ascii=False)
-
-    def get_theme(self):
+    def get_setting(self, key, default=None):
         try:
-            with open(self.path, "r", encoding="utf-8") as file:
-                settings = json.load(file)
-                return settings.get("theme", "dark")
+            content = self.file_manager._read_content()
+            settings = json.loads(content)
+            return settings.get(key, default)
         except (FileNotFoundError, json.JSONDecodeError):
-            return "dark"
+            return default
 
     def update_setting(self, key, value):
         try:
-            with open(self.path, "r", encoding="utf-8") as file:
-                settings = json.load(file)
+            content = self.file_manager._read_content()
+            settings = json.loads(content)
         except (FileNotFoundError, json.JSONDecodeError):
             settings = {}
 
         settings[key] = value
+        self.file_manager._write_content(
+            json.dumps(settings, indent=4, ensure_ascii=False)
+        )
 
-        with open(self.path, "w", encoding="utf-8") as file:
-            json.dump(settings, file, indent=4, ensure_ascii=False)
+
+class DataManager:
+    def __init__(self):
+        self.history = GameHistoryManager()
+        self.settings = SettingsManager()
+
+    def get_last_games(self):
+        return self.history.get_last_games()
+
+    def add_game_to_history(self, game_name):
+        self.history.add_game(game_name)
+
+    def clear_game_history(self):
+        self.history.clear_history()
+
+    def get_theme(self):
+        return self.settings.get_setting("theme", "dark")
+
+    def set_theme(self, theme):
+        self.settings.update_setting("theme", theme)
+
+    def update_setting(self, key, value):
+        self.settings.update_setting(key, value)
 
 
-txt_editor = TXTEditor()
-json_editor = JSONEditor()
+data_manager = DataManager()

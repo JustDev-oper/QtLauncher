@@ -1,12 +1,6 @@
 import sqlite3
-from pathlib import Path
 
-
-def get_data_path():
-    documents_path = Path.home() / "Documents"
-    data_path = documents_path / "QtLauncher_Data"
-    data_path.mkdir(exist_ok=True)
-    return data_path
+from utils import get_data_path
 
 
 class Database:
@@ -39,24 +33,20 @@ class Database:
             )"""
         )
 
-        cursor.execute("INSERT OR IGNORE INTO Categories (name) VALUES (?)",
-                       ("Все",))
+        cursor.execute(
+            "INSERT OR IGNORE INTO Categories (name) VALUES (?)", ("Все",)
+        )
 
         conn.commit()
         conn.close()
 
-    def check_name_is_unique(self, name):
+    def check_unique(self, select_from, where_value, parameter):
         conn = self.get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT COUNT(*) FROM Games WHERE name = ?", (name,))
-        count = cursor.fetchone()[0]
-        return count == 0
-
-    def check_path_is_unique(self, game_path):
-        conn = self.get_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT COUNT(*) FROM Games WHERE path = ?",
-                       (game_path,))
+        cursor.execute(
+            f"SELECT COUNT(*) FROM {select_from} WHERE {where_value} = ?",
+            (parameter,),
+        )
         count = cursor.fetchone()[0]
         return count == 0
 
@@ -69,9 +59,6 @@ class Database:
                 (name, game_path, category_id),
             )
             conn.commit()
-            print(f"Игра '{name}' добавлена в базу данных")
-        except sqlite3.IntegrityError:
-            print(f"Ошибка: игра с именем '{name}' уже существует")
         except Exception as e:
             print(f"Ошибка при добавлении игры: {e}")
         finally:
@@ -86,31 +73,31 @@ class Database:
                 (name,),
             )
             conn.commit()
-        except sqlite3.IntegrityError:
-            print(f"Ошибка: категория с именем '{name}' уже существует")
         except Exception as e:
             print(f"Ошибка при добавлении категории: {e}")
         finally:
             conn.close()
 
-    def delete_category(self, category_id):
+    def delete(self, select_from, where_value, parameter):
         conn = self.get_connection()
         cursor = conn.cursor()
         try:
             cursor.execute(
-                "DELETE FROM Categories WHERE id = ?", (category_id,)
+                f"DELETE FROM {select_from} WHERE {where_value} = ?",
+                (parameter,),
             )
             conn.commit()
         except Exception as e:
-            print(f"Ошибка при удалении категории: {e}")
+            print(f"Ошибка при удалении: {e}")
         finally:
             conn.close()
 
     def get_games_by_category(self, category_id):
         conn = self.get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM Games WHERE category_id = ?",
-                       (category_id,))
+        cursor.execute(
+            "SELECT * FROM Games WHERE category_id = ?", (category_id,)
+        )
         games = cursor.fetchall()
         conn.close()
         return games
@@ -138,15 +125,17 @@ class Database:
 
             cursor.execute(
                 "SELECT id, name, category_id FROM Games WHERE category_id NOT IN ({})".format(
-                    ','.join('?' for _ in valid_category_ids)
-                ), list(valid_category_ids))
+                    ",".join("?" for _ in valid_category_ids)
+                ),
+                list(valid_category_ids),
+            )
 
             invalid_games = cursor.fetchall()
 
             for game_id, game_name, old_category_id in invalid_games:
                 cursor.execute(
                     "UPDATE Games SET category_id = ? WHERE id = ?",
-                    (1, game_id)
+                    (1, game_id),
                 )
 
             conn.commit()
@@ -178,21 +167,6 @@ class Database:
         _id = cursor.fetchone()[0]
         conn.close()
         return _id
-
-    def category_name_check_unique(self, name):
-        conn = self.get_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT COUNT(*) FROM Categories WHERE name = ?",
-                       (name,))
-        count = cursor.fetchone()[0]
-        return count == 0
-
-    def delete_game(self, name):
-        conn = self.get_connection()
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM Games WHERE name = ?", (name,))
-        conn.commit()
-        conn.close()
 
     def get_games(self):
         conn = self.get_connection()

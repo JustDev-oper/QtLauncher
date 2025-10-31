@@ -7,7 +7,15 @@ from ui.deleteCategory import Ui_Dialog as DeleteCategoryUI
 from ui.edit_game_dialog_ui import Ui_Dialog as EditGameUI
 
 
-class AddGameDialog(QDialog, AddGameUI):
+class BaseDialog:
+    def get_categories(self):
+        combobox = self.comboBox
+        categories = database.get_categories()
+        for category in categories:
+            combobox.addItem(category[0])
+
+
+class AddGameDialog(QDialog, AddGameUI, BaseDialog):
     def __init__(self):
         super().__init__()
         self.setFixedSize(450, 180)
@@ -23,12 +31,6 @@ class AddGameDialog(QDialog, AddGameUI):
         self.buttonBox.accepted.connect(self.accept_dialog)
         self.buttonBox.rejected.connect(self.reject)
 
-    def get_categories(self):
-        combobox = self.comboBox
-        categories = database.get_categories()
-        for category in categories:
-            combobox.addItem(category[0])
-
     def choose_file(self):
         file_path = QFileDialog.getOpenFileName(
             self, "Выбрать файл", "", "EXE - Файл (*.exe)"
@@ -40,7 +42,8 @@ class AddGameDialog(QDialog, AddGameUI):
         game_name = self.game_name.text().strip()
         game_path = self.file_path.text().strip()
         category_id = database.get_category_id_by_name(
-            self.comboBox.currentText())
+            self.comboBox.currentText()
+        )
 
         if not game_name:
             QMessageBox.warning(self, "Ошибка", "Введите название игры")
@@ -53,14 +56,20 @@ class AddGameDialog(QDialog, AddGameUI):
         if not category_id:
             category_id = 1
 
-        if not database.check_name_is_unique(game_name):
-            QMessageBox.warning(self, "Ошибка",
-                                "Игра с таким именем уже существует")
+        if not database.check_unique(
+            select_from="Games", where_value="name", parameter=game_name
+        ):
+            QMessageBox.warning(
+                self, "Ошибка", "Игра с таким именем уже существует"
+            )
             return
 
-        if not database.check_path_is_unique(game_path):
-            QMessageBox.warning(self, "Ошибка",
-                                "Игра с таким путём уке существует")
+        if not database.check_unique(
+            select_from="Games", where_value="path", parameter=game_path
+        ):
+            QMessageBox.warning(
+                self, "Ошибка", "Игра с таким путём уке существует"
+            )
             return
 
         try:
@@ -69,11 +78,12 @@ class AddGameDialog(QDialog, AddGameUI):
             QMessageBox.information(self, "Успех", "Игра добавлена!")
 
         except Exception as e:
-            QMessageBox.critical(self, "Ошибка",
-                                 f"Не удалось добавить игру: {str(e)}")
+            QMessageBox.critical(
+                self, "Ошибка", f"Не удалось добавить игру: {str(e)}"
+            )
 
 
-class EditGameDialog(QDialog, EditGameUI):
+class EditGameDialog(QDialog, EditGameUI, BaseDialog):
     def __init__(self, game_name):
         super().__init__()
         self.orig_game_name = game_name
@@ -92,12 +102,6 @@ class EditGameDialog(QDialog, EditGameUI):
         self.buttonBox.accepted.connect(self.accept_dialog)
         self.buttonBox.rejected.connect(self.reject)
 
-    def get_categories(self):
-        combobox = self.comboBox
-        categories = database.get_categories()
-        for category in categories:
-            combobox.addItem(category[0])
-
     def load_game_data(self):
         game_data = database.get_game(self.orig_game_name)
         if game_data:
@@ -113,7 +117,8 @@ class EditGameDialog(QDialog, EditGameUI):
     def accept_dialog(self):
         new_game_name = self.game_name.text().strip()
         category_id = database.get_category_id_by_name(
-            self.comboBox.currentText())
+            self.comboBox.currentText()
+        )
 
         if not new_game_name:
             QMessageBox.warning(self, "Ошибка", "Введите название игры")
@@ -123,21 +128,26 @@ class EditGameDialog(QDialog, EditGameUI):
             category_id = 1
 
         # Проверяем уникальность имени, только если имя изменилось
-        if new_game_name != self.orig_game_name and not database.check_name_is_unique(
-                new_game_name):
-            QMessageBox.warning(self, "Ошибка",
-                                "Игра с таким именем уже существует")
+        if (
+            new_game_name != self.orig_game_name
+            and not database.check_name_is_unique(new_game_name)
+        ):
+            QMessageBox.warning(
+                self, "Ошибка", "Игра с таким именем уже существует"
+            )
             return
 
         try:
-            database.update_game(self.orig_game_name, new_game_name,
-                                 category_id)
+            database.update_game(
+                self.orig_game_name, new_game_name, category_id
+            )
             self.accept()
             QMessageBox.information(self, "Успех", "Игра обновлена!")
 
         except Exception as e:
-            QMessageBox.critical(self, "Ошибка",
-                                 f"Не удалось обновить игру: {str(e)}")
+            QMessageBox.critical(
+                self, "Ошибка", f"Не удалось обновить игру: {str(e)}"
+            )
 
 
 class AddCategoryDialog(QDialog, AddCategoryUI):
@@ -156,20 +166,27 @@ class AddCategoryDialog(QDialog, AddCategoryUI):
     def accept_dialog(self):
         category_name = self.lineEdit.text().strip()
         if not category_name:
-            QMessageBox.warning(self, "Ошибка",
-                                "Категория не может быть пустой")
+            QMessageBox.warning(
+                self, "Ошибка", "Категория не может быть пустой"
+            )
             return
 
-        if not database.category_name_check_unique(category_name):
-            QMessageBox.warning(self, "Ошибка",
-                                "Категория с таким именем уже есть")
+        if not database.check_unique(
+            select_from="Categories",
+            where_value="name",
+            parameter=category_name,
+        ):
+            QMessageBox.warning(
+                self, "Ошибка", "Категория с таким именем уже есть"
+            )
             return
 
         try:
             database.insert_category(category_name)
             self.accept()
-            QMessageBox.information(self, "Успех",
-                                    "Категория успешно добавлена")
+            QMessageBox.information(
+                self, "Успех", "Категория успешно добавлена"
+            )
 
         except Exception as e:
             QMessageBox.critical(
@@ -177,7 +194,7 @@ class AddCategoryDialog(QDialog, AddCategoryUI):
             )
 
 
-class DeleteCategoryDialog(QDialog, DeleteCategoryUI):
+class DeleteCategoryDialog(QDialog, DeleteCategoryUI, BaseDialog):
     def __init__(self):
         super().__init__()
         self.setFixedSize(300, 110)
@@ -192,32 +209,31 @@ class DeleteCategoryDialog(QDialog, DeleteCategoryUI):
         self.buttonBox.accepted.connect(self.accept_dialog)
         self.buttonBox.rejected.connect(self.reject)
 
-    def get_categories(self):
-        combobox = self.comboBox
-        categories = database.get_categories()
-        for category in categories:
-            combobox.addItem(category[0])
-
     def accept_dialog(self):
         category_name = self.comboBox.currentText()
         if category_name == "Все":
-            QMessageBox.warning(self, "Ошибка",
-                                "Данную категорию удалить нельзя!")
+            QMessageBox.warning(
+                self, "Ошибка", "Данную категорию удалить нельзя!"
+            )
             return
         if not category_name:
-            QMessageBox.warning(self, "Ошибка",
-                                "Категория не может быть пустой")
+            QMessageBox.warning(
+                self, "Ошибка", "Категория не может быть пустой"
+            )
             return
 
         try:
             database.edit_games_category(
-                database.get_category_id_by_name(category_name), 1)
+                database.get_category_id_by_name(category_name), 1
+            )
 
-            database.delete_category(
-                database.get_category_id_by_name(category_name))
+            database.delete(
+                select_from="Categories",
+                where_value="id",
+                parameter=database.get_category_id_by_name(category_name),
+            )
             self.accept()
-            QMessageBox.information(self, "Успех",
-                                    "Категория успешно удалена")
+            QMessageBox.information(self, "Успех", "Категория успешно удалена")
 
         except Exception as e:
             QMessageBox.critical(

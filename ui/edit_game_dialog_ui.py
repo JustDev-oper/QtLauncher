@@ -25,7 +25,9 @@ class Ui_Dialog(object):
         self.buttonBox.setFont(font)
         self.buttonBox.setOrientation(QtCore.Qt.Orientation.Horizontal)
         self.buttonBox.setStandardButtons(
-            QtWidgets.QDialogButtonBox.StandardButton.Cancel | QtWidgets.QDialogButtonBox.StandardButton.Ok)
+            QtWidgets.QDialogButtonBox.StandardButton.Cancel
+            | QtWidgets.QDialogButtonBox.StandardButton.Ok
+        )
         self.buttonBox.setObjectName("buttonBox")
         self.game_name = QtWidgets.QLineEdit(parent=Dialog)
         self.game_name.setGeometry(QtCore.QRect(100, 20, 340, 20))

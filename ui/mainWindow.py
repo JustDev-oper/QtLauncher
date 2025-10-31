@@ -20,7 +20,9 @@ class Ui_MainWindow(object):
         )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            MainWindow.sizePolicy().hasHeightForWidth()
+        )
         MainWindow.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Arial")
@@ -89,7 +91,9 @@ class Ui_MainWindow(object):
         self.label_2.setFont(font)
         self.label_2.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.label_2.setObjectName("label_2")
-        self.verticalLayoutWidget = QtWidgets.QWidget(parent=self.centralwidget)
+        self.verticalLayoutWidget = QtWidgets.QWidget(
+            parent=self.centralwidget
+        )
         self.verticalLayoutWidget.setGeometry(QtCore.QRect(520, 10, 201, 101))
         self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
         self.buttons_layout = QtWidgets.QVBoxLayout(self.verticalLayoutWidget)
@@ -105,7 +109,9 @@ class Ui_MainWindow(object):
         self.add_game.setAutoFillBackground(False)
         self.add_game.setObjectName("add_game")
         self.buttons_layout.addWidget(self.add_game)
-        self.edit_game = QtWidgets.QPushButton(parent=self.verticalLayoutWidget)
+        self.edit_game = QtWidgets.QPushButton(
+            parent=self.verticalLayoutWidget
+        )
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setPointSize(10)
@@ -114,7 +120,9 @@ class Ui_MainWindow(object):
         self.edit_game.setFont(font)
         self.edit_game.setObjectName("edit_game")
         self.buttons_layout.addWidget(self.edit_game)
-        self.delete_game = QtWidgets.QPushButton(parent=self.verticalLayoutWidget)
+        self.delete_game = QtWidgets.QPushButton(
+            parent=self.verticalLayoutWidget
+        )
         font = QtGui.QFont()
         font.setFamily("Arial")
         font.setPointSize(10)
@@ -187,7 +195,8 @@ class Ui_MainWindow(object):
         self.sort_name_z_a.setText(_translate("MainWindow", "Z - A"))
         self.label.setText(
             _translate(
-                "MainWindow", "Для запуска просто нажмите ДВА раза на название игры"
+                "MainWindow",
+                "Для запуска просто нажмите ДВА раза на название игры",
             )
         )
         self.label_2.setText(_translate("MainWindow", "Сортировать"))
@@ -202,4 +211,6 @@ class Ui_MainWindow(object):
         self.all_games.setText(_translate("MainWindow", "Все"))
         self.action_4.setText(_translate("MainWindow", "Шутеры"))
         self.create_category.setText(_translate("MainWindow", "Создать свою"))
-        self.delete_category.setText(_translate("MainWindow", "Удалить категорию"))
+        self.delete_category.setText(
+            _translate("MainWindow", "Удалить категорию")
+        )
