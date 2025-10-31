@@ -1,30 +1,30 @@
 QMainWindow {
     background-color: #2b2b2b; /* Тёмно-серый фон */
 }
-/* Стиль для всего меню-бара */
+
+/* Меню-бар */
 QMenuBar {
     background-color: #3c3f41;
     color: #a9b7c6;
 }
-/* Стиль для отдельного пункта меню (Файл, Правка...) */
 QMenuBar::item {
-    background-color: transparent; /* Прозрачный фон */
+    background-color: transparent;
 }
-/* Стиль для пункта меню при его выборе */
 QMenuBar::item:selected {
     background-color: #555;
 }
-/* Стиль для выпадающего меню */
+
+/* Выпадающее меню */
 QMenu {
     background-color: #3c3f41;
     color: #a9b7c6;
     border: 1px solid #555;
 }
-/* Стиль для пунктов в выпадающем меню при наведении */
 QMenu::item:selected {
     background-color: #555;
 }
-/* Стиль для кнопок */
+
+/* Кнопки */
 QPushButton {
     background-color: #3c3f41;
     color: #a9b7c6;
@@ -32,13 +32,69 @@ QPushButton {
     border-radius: 5px;
     padding: 5px 10px;
 }
-/* Стиль для кнопок при наведении мышки */
 QPushButton:hover {
-    border: 2px solid #3498db; /* Синяя рамка */
+    border: 2px solid #3498db;
     border-radius: 10px;
 }
-/* Стиль для кнопок при клике мышки */
 QPushButton:pressed {
-    border: 2px solid #2980b9; /* Тёмно-синяя рамка */
+    border: 2px solid #2980b9;
     border-radius: 10px;
+}
+
+/* --- ДОБАВЛЕНО --- */
+
+/* Текстовые метки */
+QLabel {
+    color: #e0e0e0; /* Светло-серый текст */
+    background-color: transparent;
+}
+
+/* Списки */
+QListWidget, QListView {
+    background-color: #3a3a3a; /* Тёмно-серый фон */
+    color: #e0e0e0; /* Светлый текст */
+    border: 1px solid #555;
+    selection-background-color: #555;
+    selection-color: #ffffff;
+}
+
+/* Поля ввода */
+QLineEdit, QPlainTextEdit, QTextEdit {
+    background-color: #3a3a3a;
+    color: #e0e0e0;
+    border: 1px solid #555;
+    border-radius: 4px;
+    selection-background-color: #555;
+    selection-color: #ffffff;
+}
+
+/* ComboBox */
+QComboBox {
+    background-color: #3a3a3a;
+    color: #e0e0e0;
+    border: 1px solid #555;
+    border-radius: 4px;
+}
+QComboBox:hover {
+    border: 1px solid #3498db;
+}
+QComboBox QAbstractItemView {
+    background-color: #3a3a3a;
+    color: #e0e0e0;
+    selection-background-color: #555;
+}
+
+/* Scrollbar (опционально, чтобы красиво выглядело) */
+QScrollBar:vertical {
+    background: #2b2b2b;
+    width: 10px;
+    margin: 0;
+}
+QScrollBar::handle:vertical {
+    background: #555;
+    min-height: 20px;
+    border-radius: 5px;
+}
+QScrollBar::handle:vertical:hover {
+    background: #666;
 }
