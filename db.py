@@ -129,6 +129,32 @@ class Database:
         finally:
             conn.close()
 
+    def check_category_id_is_valid(self):
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("SELECT id FROM Categories")
+            valid_category_ids = {row[0] for row in cursor.fetchall()}
+
+            cursor.execute(
+                "SELECT id, name, category_id FROM Games WHERE category_id NOT IN ({})".format(
+                    ','.join('?' for _ in valid_category_ids)
+                ), list(valid_category_ids))
+
+            invalid_games = cursor.fetchall()
+
+            for game_id, game_name, old_category_id in invalid_games:
+                cursor.execute(
+                    "UPDATE Games SET category_id = ? WHERE id = ?",
+                    (1, game_id)
+                )
+
+            conn.commit()
+        except Exception as e:
+            print(f"Ошибка при проверке категорий: {e}")
+        finally:
+            conn.close()
+
     def get_categories(self):
         conn = self.get_connection()
         cursor = conn.cursor()
@@ -185,6 +211,21 @@ class Database:
         row = cursor.fetchone()
         conn.close()
         return row
+
+    def update_game(self, old_name, new_name, category_id):
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute(
+                "UPDATE Games SET name = ?, category_id = ? WHERE name = ?",
+                (new_name, category_id, old_name),
+            )
+            conn.commit()
+        except Exception as e:
+            print(str(e))
+
+        finally:
+            conn.close()
 
 
 database = Database()

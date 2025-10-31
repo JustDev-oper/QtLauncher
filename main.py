@@ -11,7 +11,6 @@ from utils import txt_editor, json_editor
 
 
 def resource_path(relative_path: str) -> str:
-    """Корректный путь к файлу для работы из .py и из .exe"""
     if hasattr(sys, "_MEIPASS"):
         return os.path.join(sys._MEIPASS, relative_path)
     return os.path.join(os.path.abspath("."), relative_path)
@@ -30,6 +29,8 @@ class QtLauncher(QMainWindow, Ui_MainWindow):
 
         self.update_menu_bar()
 
+        database.check_category_id_is_valid()
+
         theme_file = resource_path(f"style/{json_editor.get_theme()}.qss")
         with open(theme_file, "r", encoding="utf-8") as qss:
             self.setStyleSheet(qss.read())
@@ -47,6 +48,7 @@ class QtLauncher(QMainWindow, Ui_MainWindow):
         self.delete_category.triggered.connect(
             lambda: self.open_dialog("delete_category")
         )
+        self.edit_game.clicked.connect(lambda: self.open_dialog("edit_game"))
 
     def set_theme(self, theme):
         theme_file = resource_path(f"style/{theme}.qss")
@@ -67,11 +69,15 @@ class QtLauncher(QMainWindow, Ui_MainWindow):
             self.last_games.addItem(game)
 
     def sort_games(self, mode):
-        games = database.get_games()
-        sorted_games = sorted(games, reverse=(mode == "r"))
+        items = []
+        for i in range(self.list_games.count()):
+            items.append(self.list_games.item(i).text())
+
+        sorted_items = sorted(items, reverse=(mode == "r"))
+
         self.list_games.clear()
-        for game in sorted_games:
-            self.list_games.addItem(game)
+        for game_name in sorted_items:
+            self.list_games.addItem(game_name)
 
     def delete_game_from_list(self):
         current_item = self.list_games.currentItem()
@@ -104,6 +110,13 @@ class QtLauncher(QMainWindow, Ui_MainWindow):
             _dialog = dialogs.DeleteCategoryDialog()
             _dialog.exec()
             self.update_menu_bar()
+        if dialog == "edit_game":
+            current_item = self.list_games.currentItem()
+            if current_item:
+                game_name = current_item.text()
+                _dialog = dialogs.EditGameDialog(game_name)
+                _dialog.exec()
+                self.update_game_list()
 
     def update_menu_bar(self):
         menu = self.menu_3
