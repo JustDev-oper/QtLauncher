@@ -58,6 +58,7 @@ class UserManager:
                 self._current_user_login = user[1]
                 self._save_session()
                 from utils import data_manager
+
                 data_manager.update_current_user(self._current_user_id)
                 return True
             return False
@@ -94,6 +95,7 @@ class UserManager:
         self._current_user_login = None
         self._delete_session()
         from utils import data_manager
+
         data_manager.update_current_user(None)
 
     def _save_session(self):

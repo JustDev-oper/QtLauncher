@@ -64,13 +64,13 @@ class GameHistoryManager:
     def __init__(self):
         self.data_path = get_data_path()
         self.current_user_id = None
-        
+
     def _get_user_history_path(self, user_id: int) -> Path:
 
         user_dir = self.data_path / f"user_{user_id}"
         user_dir.mkdir(exist_ok=True)
         return user_dir / "last_games.txt"
-    
+
     def set_current_user(self, user_id: int | None):
 
         self.current_user_id = user_id
@@ -83,10 +83,10 @@ class GameHistoryManager:
 
         if self.current_user_id is None:
             return []
-            
+
         path = self._get_user_history_path(self.current_user_id)
         try:
-            with open(path, 'r', encoding='utf-8') as f:
+            with open(path, "r", encoding="utf-8") as f:
                 return [game for game in f.read().split("\n") if game.strip()]
         except FileNotFoundError:
             return []
@@ -95,7 +95,7 @@ class GameHistoryManager:
 
         if self.current_user_id is None:
             return
-            
+
         games = self.get_last_games()
         # Удаляем дубликат и добавляем в начало
         games = [game for game in games if game != game_name]
@@ -108,19 +108,19 @@ class GameHistoryManager:
 
         if self.current_user_id is None:
             return
-            
+
         path = self._get_user_history_path(self.current_user_id)
         content = "\n".join(game for game in games if game.strip())
-        with open(path, 'w', encoding='utf-8') as f:
+        with open(path, "w", encoding="utf-8") as f:
             f.write(content)
 
     def clear_history(self):
 
         if self.current_user_id is None:
             return
-            
+
         path = self._get_user_history_path(self.current_user_id)
-        with open(path, 'w', encoding='utf-8') as f:
+        with open(path, "w", encoding="utf-8") as f:
             f.write("")
 
 
@@ -155,7 +155,7 @@ class DataManager:
         self.history = GameHistoryManager()
         self.settings = SettingsManager()
         self.session = SessionManager()
-        
+
         user_id, _ = self.session.load_session()
         self.history.set_current_user(user_id)
 
@@ -176,7 +176,7 @@ class DataManager:
 
     def update_setting(self, key, value):
         self.settings.update_setting(key, value)
-        
+
     def update_current_user(self, user_id: int | None):
         self.history.set_current_user(user_id)
 
