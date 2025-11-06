@@ -30,6 +30,36 @@ class FileManager:
             file.write(content)
 
 
+class SessionManager:
+    def __init__(self):
+        self.file_manager = FileManager("session.json")
+        self.file_manager.ensure_exists("{}")
+
+    def save_session(self, user_id: int, login: str):
+        import json
+
+        session_data = {"user_id": user_id, "login": login}
+        self.file_manager._write_content(json.dumps(session_data))
+
+    def load_session(self) -> tuple[int | None, str | None]:
+        import json
+
+        try:
+            content = self.file_manager._read_content()
+            session_data = json.loads(content)
+            return session_data.get("user_id"), session_data.get("login")
+        except (FileNotFoundError, json.JSONDecodeError):
+            return None, None
+
+    def clear_session(self):
+        import os
+
+        try:
+            os.remove(self.file_manager.path)
+        except FileNotFoundError:
+            pass
+
+
 class GameHistoryManager:
     def __init__(self):
         self.file_manager = FileManager("last_games.txt")
@@ -89,6 +119,7 @@ class DataManager:
     def __init__(self):
         self.history = GameHistoryManager()
         self.settings = SettingsManager()
+        self.session = SessionManager()
 
     def get_last_games(self):
         return self.history.get_last_games()

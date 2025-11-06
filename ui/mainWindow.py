@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'mainWindow.ui'
+# Form implementation generated from reading ui file 'ui/mainWindow.ui'
 #
 # Created by: PyQt6 UI code generator 6.10.0
 #
@@ -175,6 +175,8 @@ class Ui_MainWindow(object):
         font.setFamily("Arial")
         self.delete_category.setFont(font)
         self.delete_category.setObjectName("delete_category")
+        self.all_games_action = QtGui.QAction(parent=MainWindow)
+        self.all_games_action.setObjectName("all_games_action")
         self.menu_2.addAction(self.action_2)
         self.menu_2.addAction(self.action_3)
         self.menu.addAction(self.menu_2.menuAction())
@@ -214,3 +216,4 @@ class Ui_MainWindow(object):
         self.delete_category.setText(
             _translate("MainWindow", "Удалить категорию")
         )
+        self.all_games_action.setText(_translate("MainWindow", "Все"))

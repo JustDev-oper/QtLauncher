@@ -2,7 +2,7 @@ import os
 import sys
 
 from PyQt6.QtGui import QAction
-from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox
+from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox, QMenu
 
 import dialogs
 from db import database
@@ -22,11 +22,34 @@ class QtLauncher(QMainWindow, Ui_MainWindow):
         self.setFixedSize(750, 400)
         self.setupUi(self)
 
+        self.profile_menu = QMenu(self)
+
+        self.switch_user_action = QAction("Сменить пользователя", self)
+        self.switch_user_action.triggered.connect(self.switch_user)
+        self.profile_menu.addAction(self.switch_user_action)
+
+        self.profile_menu.addSeparator()
+
+        self.logout_action = QAction("Выйти", self)
+        self.logout_action.triggered.connect(self.logout)
+        self.profile_menu.addAction(self.logout_action)
+
+        self.profile_action = QAction("Профиль", self)
+        self.profile_action.triggered.connect(
+            lambda: self.open_dialog("profile")
+        )
+        self.profile_action.setMenu(self.profile_menu)
+        self.menuBar.addAction(self.profile_action)
+
+        if not database.users.is_authenticated():
+            if not self.show_auth_dialog():
+                return
+        else:
+            self.update_profile_button()
+
         self.update_game_list()
         self.update_last_game_list()
-
         self.update_menu_bar()
-
         database.check_category_id_is_valid()
 
         theme_file = resource_path(f"style/{data_manager.get_theme()}.qss")
@@ -119,6 +142,74 @@ class QtLauncher(QMainWindow, Ui_MainWindow):
                 _dialog = dialogs.EditGameDialog(game_name)
                 _dialog.exec()
                 self.update_game_list()
+        if dialog == "profile":
+            if not database.users.is_authenticated():
+                self.show_auth_dialog()
+            else:
+                QMessageBox.information(
+                    self,
+                    "Профиль",
+                    f"Вы вошли как: {database.users.get_current_user_login()}",
+                )
+
+    def show_auth_dialog(self):
+        _dialog = dialogs.ProfileDialog()
+        result = _dialog.exec()
+
+        if not result or not _dialog.login_success:
+            self.close()
+            return False
+
+        self.update_profile_button()
+        return True
+
+    def update_profile_button(self):
+        if database.users.is_authenticated():
+            self.profile_action.setText(
+                f"Профиль ({database.users.get_current_user_login()})"
+            )
+        else:
+            self.profile_action.setText("Войти")
+
+    def reload_user_data(self):
+        self.update_profile_button()
+        self.list_games.clear()
+        self.last_games.clear()
+        self.update_game_list()
+        self.update_last_game_list()
+        self.update_menu_bar()
+        database.check_category_id_is_valid()
+
+    def switch_user(self):
+        database.users.logout()
+        if self.show_auth_dialog():
+            self.reload_user_data()
+        else:
+            # Если пользователь отменил вход, выходим из приложения
+            self.close()
+
+    def logout(self):
+        reply = QMessageBox.question(
+            self,
+            "Подтверждение",
+            "Вы хотите выйти из системы или сменить пользователя?",
+            QMessageBox.StandardButton.Yes
+            | QMessageBox.StandardButton.No
+            | QMessageBox.StandardButton.Cancel,
+            QMessageBox.StandardButton.Cancel,
+        )
+
+        if reply == QMessageBox.StandardButton.Yes:  # Выйти
+            database.users.logout()
+            self.close()
+        elif reply == QMessageBox.StandardButton.No:  # Сменить пользователя
+            self.switch_user()
+
+        if reply == 0:  # Выйти
+            database.users.logout()
+            self.close()
+        elif reply == 1:  # Сменить пользователя
+            self.switch_user()
 
     def update_menu_bar(self):
         menu = self.menu_3
@@ -149,27 +240,30 @@ class QtLauncher(QMainWindow, Ui_MainWindow):
         self.filter_games_by_category(category_name)
 
     def filter_games_by_category(self, category_name):
-        if category_name != "Все":
-            category_id = database.get_category_id_by_name(category_name)
+        if not database.users.is_authenticated():
+            return
 
-            if category_id:
-                conn = database.get_connection()
-                cursor = conn.cursor()
-                cursor.execute(
-                    "SELECT name FROM Games WHERE category_id = ?",
-                    (category_id,),
-                )
-                games = cursor.fetchall()
-                conn.close()
+        self.list_games.clear()
 
-                self.list_games.clear()
-                for game in games:
-                    self.list_games.addItem(game[0])
-            else:
-                self.update_game_list()
-        else:
-            self.list_games.clear()
+        if category_name == "Все":
+            # Показываем все игры пользователя
             self.update_game_list()
+            return
+
+        category_id = database.get_category_id_by_name(category_name)
+        if category_id:
+            # Показываем игры только из выбранной категории
+            conn = database.get_connection()
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT name FROM Games WHERE category_id = ? AND user_id = ?",
+                (category_id, database.users.get_current_user_id()),
+            )
+            games = cursor.fetchall()
+            conn.close()
+
+            for game in games:
+                self.list_games.addItem(game[0])
 
 
 if __name__ == "__main__":

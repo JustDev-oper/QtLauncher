@@ -1,10 +1,11 @@
-from PyQt6.QtWidgets import QDialog, QFileDialog, QMessageBox
+from PyQt6.QtWidgets import QDialog, QFileDialog, QMessageBox, QLineEdit
 
 from db import database
 from ui.add_game_dialog import Ui_Dialog as AddGameUI
 from ui.createCategory import Ui_Dialog as AddCategoryUI
 from ui.deleteCategory import Ui_Dialog as DeleteCategoryUI
 from ui.edit_game_dialog_ui import Ui_Dialog as EditGameUI
+from ui.profile_dialog_ui import Ui_Dialog as ProfileUI
 
 
 class BaseDialog:
@@ -127,7 +128,6 @@ class EditGameDialog(QDialog, EditGameUI, BaseDialog):
         if not category_id:
             category_id = 1
 
-        # Проверяем уникальность имени, только если имя изменилось
         if (
             new_game_name != self.orig_game_name
             and not database.check_name_is_unique(new_game_name)
@@ -171,27 +171,20 @@ class AddCategoryDialog(QDialog, AddCategoryUI):
             )
             return
 
-        if not database.check_unique(
-            select_from="Categories",
-            where_value="name",
-            parameter=category_name,
-        ):
+        if category_name == "Все":
             QMessageBox.warning(
-                self, "Ошибка", "Категория с таким именем уже есть"
+                self, "Ошибка", "Нельзя создать категорию с таким именем"
             )
             return
 
-        try:
-            database.insert_category(category_name)
-            self.accept()
-            QMessageBox.information(
-                self, "Успех", "Категория успешно добавлена"
+        if not database.insert_category(category_name):
+            QMessageBox.warning(
+                self, "Ошибка", "Категория с таким именем уже существует"
             )
+            return
 
-        except Exception as e:
-            QMessageBox.critical(
-                self, "Ошибка", f"Не удалось добавить категорию: {str(e)}"
-            )
+        self.accept()
+        QMessageBox.information(self, "Успех", "Категория успешно добавлена")
 
 
 class DeleteCategoryDialog(QDialog, DeleteCategoryUI, BaseDialog):
@@ -239,3 +232,98 @@ class DeleteCategoryDialog(QDialog, DeleteCategoryUI, BaseDialog):
             QMessageBox.critical(
                 self, "Ошибка", f"Не удалось удалить категорию: {str(e)}"
             )
+
+
+class ProfileDialog(QDialog, ProfileUI):
+    def __init__(self):
+        super().__init__()
+        self.setFixedSize(443, 315)
+        self.status = None
+        self.login_success = False
+        self.setupUi(self)
+
+        self.lineEdit.setPlaceholderText("Введите логин")
+        self.lineEdit_2.setPlaceholderText("Введите пароль")
+        self.lineEdit_2.setEchoMode(QLineEdit.EchoMode.Password)
+
+        self.login_button.setChecked(True)
+        self.status = "Вход"
+
+        self.buttonBox.accepted.disconnect()
+        self.buttonBox.rejected.disconnect()
+
+        self.buttonBox.accepted.connect(self.accept_dialog)
+        self.buttonBox.rejected.connect(self.reject)
+
+        self.forms_button.buttonClicked.connect(self.set_status)
+
+    def set_status(self, button):
+        self.status = button.text()
+        self.lineEdit.clear()
+        self.lineEdit_2.clear()
+
+    def validate_input(self) -> tuple[bool, str]:
+        """Проверяет корректность введенных данных"""
+        login = self.lineEdit.text().strip()
+        password = self.lineEdit_2.text().strip()
+
+        if not login:
+            return False, "Введите логин"
+        if not password:
+            return False, "Введите пароль"
+        if len(login) < 3:
+            return False, "Логин должен содержать минимум 3 символа"
+        if len(password) < 6:
+            return False, "Пароль должен содержать минимум 6 символов"
+        if not login.replace("_", "").isalnum():
+            return (
+                False,
+                "Логин может содержать только буквы, цифры и знак подчеркивания",
+            )
+
+        return True, ""
+
+    def accept_dialog(self):
+        if not self.status:
+            QMessageBox.warning(
+                self, "Ошибка", "Выберите действие (Вход или Регистрация)"
+            )
+            return
+
+        valid, error_msg = self.validate_input()
+        if not valid:
+            QMessageBox.warning(self, "Ошибка", error_msg)
+            return
+
+        login = self.lineEdit.text().strip()
+        password = self.lineEdit_2.text().strip()
+
+        if self.status == "Вход":
+            if database.users.login_user(login, password):
+                QMessageBox.information(
+                    self, "Успех", "Вход выполнен успешно!"
+                )
+                self.login_success = True
+                self.accept()
+            else:
+                QMessageBox.warning(
+                    self, "Ошибка", "Неверный логин или пароль"
+                )
+        else:
+            if database.users.user_exists(login):
+                QMessageBox.warning(
+                    self,
+                    "Ошибка",
+                    "Пользователь с таким логином уже существует",
+                )
+                return
+
+            if database.users.register_user(login, password):
+                database.users.login_user(login, password)
+                QMessageBox.information(self, "Успех", "Регистрация успешна!")
+                self.login_success = True
+                self.accept()
+            else:
+                QMessageBox.critical(
+                    self, "Ошибка", "Не удалось зарегистрировать пользователя"
+                )
