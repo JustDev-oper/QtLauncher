@@ -62,17 +62,40 @@ class SessionManager:
 
 class GameHistoryManager:
     def __init__(self):
-        self.file_manager = FileManager("last_games.txt")
-        self.file_manager.ensure_exists()
+        self.data_path = get_data_path()
+        self.current_user_id = None
+        
+    def _get_user_history_path(self, user_id: int) -> Path:
 
-    def get_last_games(self):
+        user_dir = self.data_path / f"user_{user_id}"
+        user_dir.mkdir(exist_ok=True)
+        return user_dir / "last_games.txt"
+    
+    def set_current_user(self, user_id: int | None):
+
+        self.current_user_id = user_id
+        if user_id is not None:
+            path = self._get_user_history_path(user_id)
+            if not path.exists():
+                path.touch()
+
+    def get_last_games(self) -> list[str]:
+
+        if self.current_user_id is None:
+            return []
+            
+        path = self._get_user_history_path(self.current_user_id)
         try:
-            content = self.file_manager._read_content()
-            return [game for game in content.split("\n") if game.strip()]
+            with open(path, 'r', encoding='utf-8') as f:
+                return [game for game in f.read().split("\n") if game.strip()]
         except FileNotFoundError:
             return []
 
-    def add_game(self, game_name):
+    def add_game(self, game_name: str):
+
+        if self.current_user_id is None:
+            return
+            
         games = self.get_last_games()
         # Удаляем дубликат и добавляем в начало
         games = [game for game in games if game != game_name]
@@ -81,12 +104,24 @@ class GameHistoryManager:
         games = games[:5]
         self._save_games(games)
 
-    def _save_games(self, games):
+    def _save_games(self, games: list[str]):
+
+        if self.current_user_id is None:
+            return
+            
+        path = self._get_user_history_path(self.current_user_id)
         content = "\n".join(game for game in games if game.strip())
-        self.file_manager._write_content(content)
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write(content)
 
     def clear_history(self):
-        self.file_manager._write_content("")
+
+        if self.current_user_id is None:
+            return
+            
+        path = self._get_user_history_path(self.current_user_id)
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write("")
 
 
 class SettingsManager:
@@ -120,6 +155,9 @@ class DataManager:
         self.history = GameHistoryManager()
         self.settings = SettingsManager()
         self.session = SessionManager()
+        
+        user_id, _ = self.session.load_session()
+        self.history.set_current_user(user_id)
 
     def get_last_games(self):
         return self.history.get_last_games()
@@ -138,6 +176,9 @@ class DataManager:
 
     def update_setting(self, key, value):
         self.settings.update_setting(key, value)
+        
+    def update_current_user(self, user_id: int | None):
+        self.history.set_current_user(user_id)
 
 
 data_manager = DataManager()
