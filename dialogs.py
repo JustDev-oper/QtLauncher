@@ -128,9 +128,8 @@ class EditGameDialog(QDialog, EditGameUI, BaseDialog):
         if not category_id:
             category_id = 1
 
-        if (
-            new_game_name != self.orig_game_name
-            and not database.check_name_is_unique(new_game_name)
+        if new_game_name != self.orig_game_name and not database.check_unique(
+            select_from="Games", where_value="name", parameter=new_game_name
         ):
             QMessageBox.warning(
                 self, "Ошибка", "Игра с таким именем уже существует"
